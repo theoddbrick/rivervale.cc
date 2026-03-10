@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { AgentName, CommandType } from "@/lib/types";
-import { Send, RotateCcw, Stethoscope, RefreshCw, HeartPulse, Check, X } from "lucide-react";
+import { Send, RotateCcw, Stethoscope, RefreshCw, HeartPulse, Activity, Check, X } from "lucide-react";
 
 const AGENTS: { label: string; value: AgentName }[] = [
   { label: "Housekeeper", value: "\u{1F3E0} Housekeeper" },
@@ -153,10 +153,10 @@ export function CommandCenter() {
             Sync Crons
           </button>
 
-          {/* Force heartbeat per agent */}
+          {/* Per-agent actions */}
           {AGENTS.map((a) => (
             <button
-              key={a.value}
+              key={`hb-${a.value}`}
               onClick={() => sendCommand("force_heartbeat", a.value)}
               disabled={sending}
               className={`flex items-center gap-2 px-3 py-2.5 rounded-lg bg-rv-surface border text-[12px] font-medium transition-colors disabled:opacity-40 ${AGENT_BORDER_COLORS[a.value] ?? "border-rv-border hover:border-rv-accent/30"}`}
@@ -166,6 +166,25 @@ export function CommandCenter() {
                 className={AGENT_TEXT_COLORS[a.value] ?? "text-rv-subtle"}
               />
               <span className="text-rv-text">Heartbeat</span>
+              <span
+                className={`text-[10px] ${AGENT_TEXT_COLORS[a.value] ?? "text-rv-subtle"}`}
+              >
+                {a.label}
+              </span>
+            </button>
+          ))}
+          {AGENTS.map((a) => (
+            <button
+              key={`hc-${a.value}`}
+              onClick={() => sendCommand("trigger_healthcheck", a.value)}
+              disabled={sending}
+              className={`flex items-center gap-2 px-3 py-2.5 rounded-lg bg-rv-surface border text-[12px] font-medium transition-colors disabled:opacity-40 ${AGENT_BORDER_COLORS[a.value] ?? "border-rv-border hover:border-rv-accent/30"}`}
+            >
+              <Activity
+                size={13}
+                className={AGENT_TEXT_COLORS[a.value] ?? "text-rv-subtle"}
+              />
+              <span className="text-rv-text">Health Check</span>
               <span
                 className={`text-[10px] ${AGENT_TEXT_COLORS[a.value] ?? "text-rv-subtle"}`}
               >
