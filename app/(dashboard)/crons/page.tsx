@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { AgentBadge } from "@/components/agent-badge";
 import { AutoRefresh } from "@/components/auto-refresh";
+import { ExpandableText } from "@/components/expandable-text";
 import { timeAgo, statusColor, formatDate } from "@/lib/utils";
 import type { CronRun } from "@/lib/types";
 import { Clock, Play, CheckCircle2, XCircle, Loader2 } from "lucide-react";
@@ -146,18 +147,23 @@ export default async function CronsPage() {
                           ? `${Math.round((new Date(run.finished_at).getTime() - new Date(run.started_at).getTime()) / 1000)}s`
                           : "\u2014"}
                     </td>
-                    <td className="max-w-xs">
+                    <td className="max-w-sm">
                       {run.error ? (
-                        <p className="text-red-400 text-[12px] line-clamp-2 font-mono">
-                          {run.error}
-                        </p>
+                        <ExpandableText
+                          text={run.error}
+                          maxLength={100}
+                          mono
+                          errorStyle
+                        />
                       ) : run.output ? (
-                        <p className="text-rv-subtle text-[12px] line-clamp-2 font-mono">
-                          {run.output}
-                        </p>
+                        <ExpandableText
+                          text={run.output}
+                          maxLength={100}
+                          mono
+                        />
                       ) : (
                         <span className="text-rv-subtle/30 text-[12px]">
-                          \u2014
+                          &mdash;
                         </span>
                       )}
                     </td>

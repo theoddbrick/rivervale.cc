@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AgentBadge } from "@/components/agent-badge";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { CommandCenter } from "@/components/command-center";
+import { ExpandableText } from "@/components/expandable-text";
 import {
   timeAgo,
   formatDate,
@@ -164,13 +165,22 @@ export default async function CommandsPage() {
                         {cmd.status}
                       </span>
                     </td>
-                    <td className="text-rv-subtle text-[12px] max-w-xs truncate font-mono">
+                    <td className="text-rv-subtle text-[12px] max-w-sm">
                       {cmd.error ? (
-                        <span className="text-red-400">{cmd.error}</span>
+                        <ExpandableText
+                          text={cmd.error}
+                          maxLength={100}
+                          mono
+                          errorStyle
+                        />
                       ) : cmd.result ? (
-                        cmd.result
+                        <ExpandableText
+                          text={cmd.result}
+                          maxLength={100}
+                          mono
+                        />
                       ) : (
-                        "\u2014"
+                        <span className="text-rv-subtle/40">&mdash;</span>
                       )}
                     </td>
                   </tr>

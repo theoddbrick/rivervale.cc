@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { AgentBadge } from "@/components/agent-badge";
 import { AutoRefresh } from "@/components/auto-refresh";
+import { ExpandableRowDetail } from "@/components/expandable-text";
 import { timeAgo, categoryColor, statusColor, formatDate } from "@/lib/utils";
 import type { AgentLog } from "@/lib/types";
 import { Activity, Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
@@ -222,16 +223,11 @@ export default async function ActivityPage({
                       </span>
                     </td>
                     <td>
-                      <div className="max-w-md">
-                        <p className="text-rv-text text-[13px] leading-snug">
-                          {log.title}
-                        </p>
-                        {log.description && (
-                          <p className="text-rv-subtle text-[12px] mt-0.5 line-clamp-1">
-                            {log.description}
-                          </p>
-                        )}
-                      </div>
+                      <ExpandableRowDetail
+                        title={log.title}
+                        description={log.description}
+                        details={log.metadata as Record<string, unknown> | null}
+                      />
                     </td>
                     <td>
                       <span

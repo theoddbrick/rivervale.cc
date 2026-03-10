@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { AgentBadge } from "@/components/agent-badge";
 import { AutoRefresh } from "@/components/auto-refresh";
+import { ExpandableRowDetail, ExpandableText } from "@/components/expandable-text";
 import { timeAgo, formatDate, delegationStatusColor } from "@/lib/utils";
 import type { Delegation } from "@/lib/types";
 import { ArrowLeftRight } from "lucide-react";
@@ -143,16 +144,10 @@ export default async function DelegationsPage() {
                       <AgentBadge agent={d.to_agent} size="sm" />
                     </td>
                     <td>
-                      <div className="max-w-sm">
-                        <p className="text-rv-text text-[13px] leading-snug">
-                          {d.task_summary}
-                        </p>
-                        {d.task_detail && (
-                          <p className="text-rv-subtle text-[12px] mt-0.5 line-clamp-1">
-                            {d.task_detail}
-                          </p>
-                        )}
-                      </div>
+                      <ExpandableRowDetail
+                        title={d.task_summary}
+                        description={d.task_detail}
+                      />
                     </td>
                     <td>
                       <span
@@ -164,10 +159,12 @@ export default async function DelegationsPage() {
                         {d.status}
                       </span>
                     </td>
-                    <td>
-                      <p className="text-rv-subtle text-[12px] max-w-xs truncate">
-                        {d.outcome ?? "\u2014"}
-                      </p>
+                    <td className="max-w-xs">
+                      {d.outcome ? (
+                        <ExpandableText text={d.outcome} maxLength={80} />
+                      ) : (
+                        <span className="text-rv-subtle/40 text-[12px]">&mdash;</span>
+                      )}
                     </td>
                     <td className="whitespace-nowrap text-rv-subtle text-[12px]">
                       {d.completed_at
