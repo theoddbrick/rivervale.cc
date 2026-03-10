@@ -1,8 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { AgentBadge } from "@/components/agent-badge";
+import { AutoRefresh } from "@/components/auto-refresh";
 import { timeAgo, priorityColor, formatDate } from "@/lib/utils";
 import type { Task } from "@/lib/types";
 import { CheckSquare, Circle, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { TaskActions, TaskStatusSelect } from "@/components/task-actions";
 
 export const revalidate = 30;
 
@@ -36,6 +38,7 @@ export default async function TasksPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+      <AutoRefresh />
       {/* Header */}
       <div className="mb-8 animate-in">
         <div className="flex items-center gap-3 mb-1">
@@ -48,6 +51,9 @@ export default async function TasksPage() {
           Agent task board — created and tracked by agents
         </p>
       </div>
+
+      {/* New Task */}
+      <TaskActions />
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-8">
@@ -141,12 +147,18 @@ export default async function TasksPage() {
 
                       <div className="flex items-center justify-between">
                         <AgentBadge agent={task.agent} size="sm" />
-                        <span
-                          className="text-rv-subtle/50 text-[11px]"
-                          title={formatDate(task.created_at)}
-                        >
-                          {timeAgo(task.created_at)}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <TaskStatusSelect
+                            taskId={task.id}
+                            currentStatus={task.status}
+                          />
+                          <span
+                            className="text-rv-subtle/50 text-[11px]"
+                            title={formatDate(task.created_at)}
+                          >
+                            {timeAgo(task.created_at)}
+                          </span>
+                        </div>
                       </div>
 
                       {task.due_at && (

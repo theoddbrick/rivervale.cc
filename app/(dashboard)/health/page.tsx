@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { AgentBadge } from "@/components/agent-badge";
+import { AutoRefresh } from "@/components/auto-refresh";
 import { timeAgo, statusColor, formatDate } from "@/lib/utils";
 import type { SystemHealth } from "@/lib/types";
 import { Heart, Shield, AlertTriangle, XOctagon } from "lucide-react";
@@ -53,6 +54,7 @@ export default async function HealthPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+      <AutoRefresh />
       <div className="flex items-start justify-between mb-8 animate-in">
         <div>
           <div className="flex items-center gap-3 mb-1">

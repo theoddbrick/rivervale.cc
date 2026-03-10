@@ -75,3 +75,37 @@ export function priorityColor(priority: string): string {
   };
   return colors[priority] ?? "text-slate-400";
 }
+
+export function delegationStatusColor(status: string): string {
+  const colors: Record<string, string> = {
+    sent: 'text-blue-400',
+    acknowledged: 'text-cyan-400',
+    success: 'text-emerald-400',
+    failed: 'text-red-400',
+    partial: 'text-yellow-400',
+    timeout: 'text-orange-400',
+  }
+  return colors[status] || 'text-[var(--color-rv-subtle)]'
+}
+
+export function commandStatusColor(status: string): string {
+  const colors: Record<string, string> = {
+    pending: 'text-yellow-400',
+    executing: 'text-blue-400',
+    completed: 'text-emerald-400',
+    failed: 'text-red-400',
+  }
+  return colors[status] || 'text-[var(--color-rv-subtle)]'
+}
+
+export function commandTypeLabel(type: string): string {
+  const labels: Record<string, string> = {
+    message_agent: 'Message Agent',
+    trigger_healthcheck: 'Health Check',
+    restart_gateway: 'Restart Gateway',
+    run_doctor: 'Run Doctor',
+    sync_crons: 'Sync Crons',
+    force_heartbeat: 'Force Heartbeat',
+  }
+  return labels[type] || type
+}

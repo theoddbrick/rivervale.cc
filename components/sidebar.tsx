@@ -9,6 +9,8 @@ import {
   Clock,
   Settings,
   Heart,
+  ArrowLeftRight,
+  Terminal,
   LogOut,
   Zap,
 } from "lucide-react";
@@ -21,6 +23,8 @@ const nav = [
   { href: "/crons", icon: Clock, label: "Crons" },
   { href: "/config", icon: Settings, label: "Config" },
   { href: "/health", icon: Heart, label: "Health" },
+  { href: "/delegations", icon: ArrowLeftRight, label: "Delegations" },
+  { href: "/commands", icon: Terminal, label: "Commands" },
 ];
 
 export function Sidebar() {

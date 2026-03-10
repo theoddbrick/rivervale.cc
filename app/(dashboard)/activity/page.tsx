@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { AgentBadge } from "@/components/agent-badge";
+import { AutoRefresh } from "@/components/auto-refresh";
 import { timeAgo, categoryColor, statusColor, formatDate } from "@/lib/utils";
 import type { AgentLog } from "@/lib/types";
 import { Activity, Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
@@ -75,6 +76,7 @@ export default async function ActivityPage({
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+      <AutoRefresh />
       {/* Header */}
       <div className="mb-8 animate-in">
         <div className="flex items-center gap-3 mb-1">

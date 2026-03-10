@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { AgentBadge } from "@/components/agent-badge";
+import { AutoRefresh } from "@/components/auto-refresh";
 import { timeAgo, categoryColor, formatDate, agentSlug } from "@/lib/utils";
+import type { Heartbeat } from "@/lib/types";
 import { Bot, MessageSquare, Wifi } from "lucide-react";
 
 export const revalidate = 30;
@@ -76,6 +78,13 @@ export default async function AgentsPage() {
     .limit(50);
   const health = (healthRaw ?? []) as HealthEntry[];
 
+  const { data: heartbeatsRaw } = await supabase
+    .from('heartbeats')
+    .select('*')
+    .order('checked_at', { ascending: false })
+    .limit(20)
+  const heartbeats = (heartbeatsRaw ?? []) as Heartbeat[];
+
   const lastLog = (agentName: string) =>
     recentLogs.find((l) => l.agent === agentName);
 
@@ -88,8 +97,12 @@ export default async function AgentsPage() {
   const recentActivity = (agentName: string) =>
     recentLogs.filter((l) => l.agent === agentName).slice(0, 5);
 
+  const latestHeartbeat = (agentName: string) =>
+    heartbeats.find((hb) => hb.agent === agentName);
+
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+      <AutoRefresh />
       <div className="mb-8 animate-in">
         <div className="flex items-center gap-3 mb-1">
           <div className="w-8 h-8 rounded-lg bg-violet-500/[0.12] flex items-center justify-center">
@@ -107,6 +120,7 @@ export default async function AgentsPage() {
           const last = lastLog(agent.name);
           const count7d = weekCount(agent.name);
           const h = latestHealth(agent.name);
+          const hb = latestHeartbeat(agent.name);
           const recent = recentActivity(agent.name);
           const slug = agentSlug(agent.name);
           const glowClass = `glow-${slug}`;
@@ -195,6 +209,46 @@ export default async function AgentsPage() {
                       {h.component} &middot; {h.status} &middot;{" "}
                       {timeAgo(h.checked_at)}
                     </span>
+                  </div>
+                )}
+
+                {/* Heartbeat */}
+                {hb && (
+                  <div className="mb-3 flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          hb.status === "ok"
+                            ? "bg-green-400 dot-pulse"
+                            : hb.status === "warning"
+                              ? "bg-yellow-400 dot-pulse-fast"
+                              : "bg-red-400 dot-pulse-fast"
+                        }`}
+                      />
+                      <span className="text-rv-subtle text-[11px]">
+                        Heartbeat {timeAgo(hb.checked_at)}
+                      </span>
+                    </div>
+                    {hb.context_pct != null && (
+                      <div className="flex items-center gap-1.5 ml-auto">
+                        <span className="text-rv-subtle text-[10px]">ctx</span>
+                        <div className="w-16 h-1.5 rounded-full bg-rv-muted/60 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all ${
+                              hb.context_pct > 80
+                                ? "bg-red-400"
+                                : hb.context_pct > 50
+                                  ? "bg-yellow-400"
+                                  : "bg-green-400"
+                            }`}
+                            style={{ width: `${Math.min(hb.context_pct, 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-rv-subtle text-[10px] font-mono">
+                          {hb.context_pct}%
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
 

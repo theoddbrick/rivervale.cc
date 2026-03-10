@@ -67,6 +67,47 @@ export interface SystemHealth {
   details: Record<string, unknown>;
 }
 
+export interface Heartbeat {
+  id: string
+  checked_at: string
+  agent: AgentName
+  status: 'ok' | 'warning' | 'error'
+  context_pct: number | null
+  session_active: boolean
+  details: Record<string, unknown>
+}
+
+export type DelegationStatus = 'sent' | 'acknowledged' | 'success' | 'failed' | 'partial' | 'timeout'
+
+export interface Delegation {
+  id: string
+  created_at: string
+  completed_at: string | null
+  from_agent: AgentName
+  to_agent: AgentName
+  task_summary: string
+  task_detail: string | null
+  status: DelegationStatus
+  outcome: string | null
+  follow_up: string | null
+  metadata: Record<string, unknown>
+}
+
+export type CommandType = 'message_agent' | 'trigger_healthcheck' | 'restart_gateway' | 'run_doctor' | 'sync_crons' | 'force_heartbeat'
+export type CommandStatus = 'pending' | 'executing' | 'completed' | 'failed'
+
+export interface DashboardCommand {
+  id: string
+  created_at: string
+  executed_at: string | null
+  command_type: CommandType
+  target_agent: AgentName | null
+  payload: Record<string, unknown>
+  status: CommandStatus
+  result: string | null
+  error: string | null
+}
+
 // Supabase database shape (for typed client)
 export interface Database {
   public: {
@@ -95,6 +136,21 @@ export interface Database {
         Row: SystemHealth;
         Insert: Omit<SystemHealth, "id">;
         Update: Partial<Omit<SystemHealth, "id">>;
+      };
+      heartbeats: {
+        Row: Heartbeat;
+        Insert: Omit<Heartbeat, "id" | "checked_at">;
+        Update: Partial<Omit<Heartbeat, "id">>;
+      };
+      delegations: {
+        Row: Delegation;
+        Insert: Omit<Delegation, "id" | "created_at">;
+        Update: Partial<Omit<Delegation, "id">>;
+      };
+      dashboard_commands: {
+        Row: DashboardCommand;
+        Insert: Omit<DashboardCommand, "id" | "created_at">;
+        Update: Partial<Omit<DashboardCommand, "id">>;
       };
     };
   };

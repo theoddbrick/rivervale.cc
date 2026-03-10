@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { AgentBadge } from "@/components/agent-badge";
+import { AutoRefresh } from "@/components/auto-refresh";
 import { timeAgo, statusColor, formatDate } from "@/lib/utils";
 import type { ConfigChange } from "@/lib/types";
 import { Settings, GitBranch, RotateCcw, AlertTriangle } from "lucide-react";
@@ -24,6 +25,7 @@ export default async function ConfigPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+      <AutoRefresh />
       <div className="mb-8 animate-in">
         <div className="flex items-center gap-3 mb-1">
           <div className="w-8 h-8 rounded-lg bg-orange-500/[0.12] flex items-center justify-center">
