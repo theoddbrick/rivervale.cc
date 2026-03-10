@@ -2,14 +2,20 @@ import { createClient } from "@/lib/supabase/server";
 import { AgentBadge } from "@/components/agent-badge";
 import { timeAgo, priorityColor, formatDate } from "@/lib/utils";
 import type { Task } from "@/lib/types";
+import { CheckSquare, Circle, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 export const revalidate = 30;
 
-const COLUMNS: { key: Task["status"]; label: string; color: string }[] = [
-  { key: "todo",        label: "To Do",      color: "text-slate-400 border-slate-400/30" },
-  { key: "in_progress", label: "In Progress", color: "text-yellow-400 border-yellow-400/30" },
-  { key: "blocked",     label: "Blocked",    color: "text-red-400 border-red-400/30" },
-  { key: "done",        label: "Done",       color: "text-green-400 border-green-400/30" },
+const COLUMNS: {
+  key: Task["status"];
+  label: string;
+  accent: string;
+  icon: typeof Circle;
+}[] = [
+  { key: "todo", label: "To Do", accent: "text-slate-400 border-slate-400/20", icon: Circle },
+  { key: "in_progress", label: "In Progress", accent: "text-yellow-400 border-yellow-400/20", icon: Loader2 },
+  { key: "blocked", label: "Blocked", accent: "text-red-400 border-red-400/20", icon: AlertTriangle },
+  { key: "done", label: "Done", accent: "text-emerald-400 border-emerald-400/20", icon: CheckCircle2 },
 ];
 
 export default async function TasksPage() {
@@ -24,74 +30,119 @@ export default async function TasksPage() {
   const byStatus = (status: Task["status"]) =>
     (tasks as Task[] | null)?.filter((t) => t.status === status) ?? [];
 
-  const total     = tasks?.length ?? 0;
+  const total = tasks?.length ?? 0;
   const inProgress = byStatus("in_progress").length;
-  const blocked    = byStatus("blocked").length;
+  const blocked = byStatus("blocked").length;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-rv-text">Tasks</h1>
-        <p className="text-rv-subtle text-sm mt-0.5">Agent task board — created and tracked by agents</p>
+    <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="mb-8 animate-in">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/[0.12] flex items-center justify-center">
+            <CheckSquare size={15} className="text-emerald-400" />
+          </div>
+          <h1 className="text-xl font-semibold tracking-tight">Tasks</h1>
+        </div>
+        <p className="text-rv-subtle text-[13px] ml-11">
+          Agent task board — created and tracked by agents
+        </p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="bg-rv-surface border border-rv-border rounded-xl p-4">
-          <p className="text-rv-subtle text-xs mb-1">Total open</p>
-          <p className="text-2xl font-bold text-rv-text">{total}</p>
+      <div className="grid grid-cols-3 gap-3 mb-8">
+        <div className="card stat-card p-4 animate-in s1" style={{ "--stat-glow": "rgba(99, 102, 241, 0.12)" } as React.CSSProperties}>
+          <p className="text-rv-subtle text-[11px] uppercase tracking-wider font-medium mb-1.5">
+            Total open
+          </p>
+          <p className="text-3xl font-bold text-rv-text tracking-tight">
+            {total}
+          </p>
         </div>
-        <div className="bg-rv-surface border border-rv-border rounded-xl p-4">
-          <p className="text-rv-subtle text-xs mb-1">In progress</p>
-          <p className="text-2xl font-bold text-yellow-400">{inProgress}</p>
+        <div className="card stat-card p-4 animate-in s2" style={{ "--stat-glow": "rgba(234, 179, 8, 0.15)" } as React.CSSProperties}>
+          <p className="text-rv-subtle text-[11px] uppercase tracking-wider font-medium mb-1.5">
+            In progress
+          </p>
+          <p className="text-3xl font-bold text-yellow-400 tracking-tight">
+            {inProgress}
+          </p>
         </div>
-        <div className="bg-rv-surface border border-rv-border rounded-xl p-4">
-          <p className="text-rv-subtle text-xs mb-1">Blocked</p>
-          <p className="text-2xl font-bold text-red-400">{blocked}</p>
+        <div className="card stat-card p-4 animate-in s3" style={{ "--stat-glow": "rgba(239, 68, 68, 0.12)" } as React.CSSProperties}>
+          <p className="text-rv-subtle text-[11px] uppercase tracking-wider font-medium mb-1.5">
+            Blocked
+          </p>
+          <p className="text-3xl font-bold text-red-400 tracking-tight">
+            {blocked}
+          </p>
         </div>
       </div>
 
-      {/* Kanban columns */}
+      {/* Kanban */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        {COLUMNS.map(({ key, label, color }) => {
+        {COLUMNS.map(({ key, label, accent, icon: Icon }, colIdx) => {
           const columnTasks = byStatus(key);
           return (
-            <div key={key} className="bg-rv-surface border border-rv-border rounded-xl overflow-hidden">
+            <div
+              key={key}
+              className={`card overflow-hidden animate-in s${colIdx + 4}`}
+            >
               {/* Column header */}
-              <div className={`px-4 py-3 border-b border-rv-border flex items-center justify-between`}>
-                <span className={`text-xs font-semibold uppercase tracking-wider ${color.split(" ")[0]}`}>
-                  {label}
-                </span>
-                <span className="text-xs text-rv-subtle bg-rv-muted rounded-full px-2 py-0.5">
+              <div className="px-4 py-3 border-b border-rv-border/60 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Icon
+                    size={13}
+                    className={accent.split(" ")[0]}
+                  />
+                  <span
+                    className={`text-[11px] font-semibold uppercase tracking-wider ${accent.split(" ")[0]}`}
+                  >
+                    {label}
+                  </span>
+                </div>
+                <span className="text-[11px] text-rv-subtle bg-rv-muted/50 rounded-full px-2 py-0.5 font-medium">
                   {columnTasks.length}
                 </span>
               </div>
 
               {/* Cards */}
-              <div className="p-3 space-y-2 min-h-[120px]">
+              <div className="p-3 space-y-2 min-h-[140px]">
                 {columnTasks.length === 0 ? (
-                  <p className="text-rv-subtle/40 text-xs text-center py-6">Empty</p>
+                  <p className="text-rv-subtle/30 text-[12px] text-center py-8">
+                    No tasks
+                  </p>
                 ) : (
                   columnTasks.map((task) => (
                     <div
                       key={task.id}
-                      className="bg-rv-bg border border-rv-border rounded-lg p-3 hover:border-rv-muted transition-colors"
+                      className="bg-rv-bg/80 border border-rv-border/60 rounded-xl p-3.5 card-hover"
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <p className="text-rv-text text-sm font-medium leading-snug">{task.title}</p>
-                        <span className={`text-xs shrink-0 ${priorityColor(task.priority)}`}>
-                          {task.priority === "urgent" ? "🔴" : task.priority === "high" ? "🟠" : task.priority === "low" ? "⚪" : "⚫"}
+                        <p className="text-rv-text text-[13px] font-medium leading-snug">
+                          {task.title}
+                        </p>
+                        <span
+                          className={`text-[11px] shrink-0 ${priorityColor(task.priority)}`}
+                        >
+                          {task.priority === "urgent"
+                            ? "\u{1F534}"
+                            : task.priority === "high"
+                              ? "\u{1F7E0}"
+                              : task.priority === "low"
+                                ? "\u26AA"
+                                : "\u26AB"}
                         </span>
                       </div>
 
                       {task.description && (
-                        <p className="text-rv-subtle text-xs line-clamp-2 mb-2">{task.description}</p>
+                        <p className="text-rv-subtle text-[12px] line-clamp-2 mb-2.5 leading-relaxed">
+                          {task.description}
+                        </p>
                       )}
 
                       <div className="flex items-center justify-between">
                         <AgentBadge agent={task.agent} size="sm" />
                         <span
-                          className="text-rv-subtle/60 text-xs"
+                          className="text-rv-subtle/50 text-[11px]"
                           title={formatDate(task.created_at)}
                         >
                           {timeAgo(task.created_at)}
@@ -99,7 +150,7 @@ export default async function TasksPage() {
                       </div>
 
                       {task.due_at && (
-                        <p className="text-xs text-amber-400/70 mt-1.5">
+                        <p className="text-[11px] text-amber-400/70 mt-2 font-medium">
                           Due {timeAgo(task.due_at)}
                         </p>
                       )}

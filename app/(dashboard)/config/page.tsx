@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AgentBadge } from "@/components/agent-badge";
 import { timeAgo, statusColor, formatDate } from "@/lib/utils";
 import type { ConfigChange } from "@/lib/types";
+import { Settings, GitBranch, RotateCcw, AlertTriangle } from "lucide-react";
 
 export const revalidate = 30;
 
@@ -14,63 +15,111 @@ export default async function ConfigPage() {
     .order("created_at", { ascending: false })
     .limit(100);
 
-  const total       = count ?? 0;
-  const rolledBack  = (changes as ConfigChange[] | null)?.filter((c) => c.status === "rolled-back").length ?? 0;
-  const failed      = (changes as ConfigChange[] | null)?.filter((c) => c.status === "failed").length ?? 0;
+  const changesList = (changes as ConfigChange[] | null) ?? [];
+  const total = count ?? 0;
+  const rolledBack = changesList.filter(
+    (c) => c.status === "rolled-back"
+  ).length;
+  const failed = changesList.filter((c) => c.status === "failed").length;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-rv-text">Config Changes</h1>
-        <p className="text-rv-subtle text-sm mt-0.5">Full audit trail of every openclaw.json modification</p>
+    <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+      <div className="mb-8 animate-in">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-8 h-8 rounded-lg bg-orange-500/[0.12] flex items-center justify-center">
+            <Settings size={15} className="text-orange-400" />
+          </div>
+          <h1 className="text-xl font-semibold tracking-tight">
+            Config Changes
+          </h1>
+        </div>
+        <p className="text-rv-subtle text-[13px] ml-11">
+          Full audit trail of every openclaw.json modification
+        </p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="bg-rv-surface border border-rv-border rounded-xl p-4">
-          <p className="text-rv-subtle text-xs mb-1">Total changes</p>
-          <p className="text-2xl font-bold text-rv-text">{total}</p>
+      <div className="grid grid-cols-3 gap-3 mb-8">
+        <div className="card stat-card p-4 animate-in s1" style={{ "--stat-glow": "rgba(99, 102, 241, 0.12)" } as React.CSSProperties}>
+          <div className="flex items-center gap-2 mb-1.5">
+            <GitBranch size={11} className="text-rv-subtle" />
+            <p className="text-rv-subtle text-[11px] uppercase tracking-wider font-medium">
+              Total changes
+            </p>
+          </div>
+          <p className="text-3xl font-bold text-rv-text tracking-tight">
+            {total}
+          </p>
         </div>
-        <div className="bg-rv-surface border border-rv-border rounded-xl p-4">
-          <p className="text-rv-subtle text-xs mb-1">Rolled back</p>
-          <p className="text-2xl font-bold text-amber-400">{rolledBack}</p>
+        <div className="card stat-card p-4 animate-in s2" style={{ "--stat-glow": "rgba(245, 158, 11, 0.15)" } as React.CSSProperties}>
+          <div className="flex items-center gap-2 mb-1.5">
+            <RotateCcw size={11} className="text-amber-400" />
+            <p className="text-rv-subtle text-[11px] uppercase tracking-wider font-medium">
+              Rolled back
+            </p>
+          </div>
+          <p className="text-3xl font-bold text-amber-400 tracking-tight">
+            {rolledBack}
+          </p>
         </div>
-        <div className="bg-rv-surface border border-rv-border rounded-xl p-4">
-          <p className="text-rv-subtle text-xs mb-1">Failed</p>
-          <p className="text-2xl font-bold text-red-400">{failed}</p>
+        <div className="card stat-card p-4 animate-in s3" style={{ "--stat-glow": "rgba(239, 68, 68, 0.12)" } as React.CSSProperties}>
+          <div className="flex items-center gap-2 mb-1.5">
+            <AlertTriangle size={11} className="text-red-400" />
+            <p className="text-rv-subtle text-[11px] uppercase tracking-wider font-medium">
+              Failed
+            </p>
+          </div>
+          <p className="text-3xl font-bold text-red-400 tracking-tight">
+            {failed}
+          </p>
         </div>
       </div>
 
       {/* Changes list */}
       <div className="space-y-3">
-        {changes && changes.length > 0 ? (
-          (changes as ConfigChange[]).map((change) => (
-            <div key={change.id} className="bg-rv-surface border border-rv-border rounded-xl p-4">
+        {changesList.length > 0 ? (
+          changesList.map((change, i) => (
+            <div
+              key={change.id}
+              className={`card card-hover p-5 animate-in s${Math.min(i + 4, 8)}`}
+            >
               <div className="flex items-start justify-between gap-4 mb-2">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1.5">
                     <AgentBadge agent={change.agent} size="sm" />
-                    <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${statusColor(change.status)}`}>
+                    <span
+                      className={`text-[11px] px-2 py-0.5 rounded-md font-medium ${statusColor(change.status)}`}
+                    >
                       {change.status}
                     </span>
                   </div>
-                  <p className="text-rv-text text-sm font-medium">{change.summary}</p>
+                  <p className="text-rv-text text-[14px] font-medium leading-snug">
+                    {change.summary}
+                  </p>
                 </div>
-                <span className="text-rv-subtle text-xs whitespace-nowrap" title={formatDate(change.created_at)}>
+                <span
+                  className="text-rv-subtle/60 text-[12px] whitespace-nowrap shrink-0"
+                  title={formatDate(change.created_at)}
+                >
                   {timeAgo(change.created_at)}
                 </span>
               </div>
 
               {change.rationale && (
-                <p className="text-rv-subtle text-xs mb-2">{change.rationale}</p>
+                <p className="text-rv-subtle text-[13px] mb-2 leading-relaxed">
+                  {change.rationale}
+                </p>
               )}
 
               {change.patch_applied && (
-                <details className="mt-2">
-                  <summary className="text-rv-subtle/60 text-xs cursor-pointer hover:text-rv-subtle">
-                    View patch →
+                <details className="mt-3 group">
+                  <summary className="text-rv-subtle/50 text-[12px] cursor-pointer hover:text-rv-subtle transition-colors font-medium">
+                    <span className="group-open:hidden">View patch →</span>
+                    <span className="hidden group-open:inline">
+                      Hide patch ↑
+                    </span>
                   </summary>
-                  <pre className="mt-2 p-3 bg-rv-bg rounded-lg border border-rv-border/50 text-xs text-rv-subtle font-mono overflow-x-auto whitespace-pre-wrap">
+                  <pre className="mt-2 p-4 bg-rv-bg/80 rounded-xl border border-rv-border/40 text-[12px] text-rv-subtle font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed">
                     {change.patch_applied}
                   </pre>
                 </details>
@@ -78,11 +127,19 @@ export default async function ConfigPage() {
             </div>
           ))
         ) : (
-          <div className="bg-rv-surface border border-rv-border rounded-xl py-16 text-center text-rv-subtle">
-            <p className="text-4xl mb-3">⚙️</p>
-            <p className="text-sm">No config changes recorded yet.</p>
-            <p className="text-xs mt-1">
-              Agents use <code className="font-mono">supabase config-change</code> to log here.
+          <div className="card py-20 text-center">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-rv-muted/30 mb-4">
+              <Settings size={22} className="text-rv-subtle/50" />
+            </div>
+            <p className="text-rv-subtle text-sm font-medium">
+              No config changes recorded yet
+            </p>
+            <p className="text-rv-subtle/60 text-[12px] mt-1 max-w-xs mx-auto">
+              Agents use{" "}
+              <code className="font-mono text-rv-subtle/80">
+                supabase config-change
+              </code>{" "}
+              to log here.
             </p>
           </div>
         )}
